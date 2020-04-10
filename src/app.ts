@@ -166,17 +166,23 @@ export default class HelloWorld {
 		});
 
 		setInterval(() => {
-			if (this.allRightHands.size > 1) {
-				const hands = Array.from(this.allRightHands.values());
-				this.rightSoundHand.updateSound("righthand", hands[0].transform.app.position,
-					//new Vector3(0, 0, 0));
-					hands[1].transform.app.position);
-			}
-			if (this.allLeftHands.size > 1) {
-				const hands = Array.from(this.allLeftHands.values());
-				this.leftSoundHand.updateSound("lefthand", hands[0].transform.app.position,
-					//new Vector3(0, 0, 0));
-					hands[1].transform.app.position);
+			if (this.allRightHands.size > 1 && this.allLeftHands.size > 1) {
+				const allRightHandsArray = Array.from(this.allRightHands.values());
+				const allLeftHandsArray = Array.from(this.allLeftHands.values());
+
+				const user1Right=allRightHandsArray[0];
+				const user2Right=allRightHandsArray[1];
+				
+				const user1Left=allLeftHandsArray[0];
+				const user2Left=allLeftHandsArray[1];
+
+				this.rightSoundHand.updateSound("righthand",
+					user1Right.transform.app.position,
+					user2Left.transform.app.position);
+			
+				this.leftSoundHand.updateSound("lefthand", 
+					user1Left.transform.app.position,
+					user2Right.transform.app.position);
 			}
 		}, 30); //fire every 30ms
 		

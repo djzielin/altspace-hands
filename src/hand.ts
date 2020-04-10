@@ -125,7 +125,8 @@ export default class SoundHand {
 					}, this.cubeTime, MRE.AnimationEaseCurves.Linear);
 				}
 
-				this.cubeTime=1.0*flatDist;
+				this.cubeTime=2.0*flatDist;
+				
 
 				////////////////// User 1 ---> User 2 /////////////////////
 				this.currentCube= this.visCubes.shift();
@@ -154,8 +155,11 @@ export default class SoundHand {
 					handPos2.y + (Math.random() * 0.005),
 					handPos2.z + (Math.random() * 0.005));
 
-				this.currentCube2.transform.local.position=jitteredHandPos2; 
-				this.cubeTarget2 = handPos;
+				const crossProduct: Vector3=Vector3.Cross((handPos.subtract(handPos2)).normalize(),new Vector3(0,1,0));
+				const moveToSide: Vector3 = crossProduct.multiplyByFloats(0.04,0.04,0.04);
+
+				this.currentCube2.transform.local.position=jitteredHandPos2.add(moveToSide); 
+				this.cubeTarget2 = handPos.add(moveToSide); 
 
 				this.currentCube2.appearance.enabled=true;
 				this.currentCube2.appearance.material.color=	new MRE.Color4(0.0, 1.0, 0.0, 1.0);					
@@ -169,7 +173,7 @@ export default class SoundHand {
 			let timeCreated=v[0];
 			let lifeTime=v[1];
 
-			if(d.getTime()-timeCreated>lifeTime){
+			if(d.getTime()-timeCreated>(lifeTime+100)){
 				k.appearance.enabled=false;
 			}
 		}
