@@ -14,6 +14,7 @@ export default class SoundHand {
 	private playingSounds: MRE.MediaInstance[] = [];
 	private boxMesh: MRE.Mesh;
 	private visCubes: MRE.Actor[] = [];
+	private visCubes2: MRE.Actor[] = [];
 	private frameCounter=0;
 	private currentCube: MRE.Actor=null;
 	private cubeTarget: MRE.Vector3;
@@ -24,7 +25,7 @@ export default class SoundHand {
 		this.soundActor = MRE.Actor.Create(context);
 		this.boxMesh = this.assets.createBoxMesh('box', .02, 0.02, 0.02);
 
-		for(let i=0;i<30;i++) {
+		for(let i=0;i<60;i++) {
 			const ourMat: MRE.Material = this.assets.createMaterial('cube mat',{
 				color: new MRE.Color4(1.0,1.0,1.0,1.0)
 			});
@@ -97,48 +98,65 @@ export default class SoundHand {
 		//MRE.log.info("app", "     vol: " + ourVol);
 
 
-		this.playingSounds[1].setState(
+		this.playingSounds[0].setState(
 			{
 				pitch: ourPitch,
 				volume: ourVol
 			});
 
-		if (this.frameCounter % 3 === 0) {
+		if (this.frameCounter % 5 === 0) {
 			if (flatDist < 2.0) {
+				if (this.currentCube) {				
+					this.currentCube.animateTo({
+						transform: {
+							local: { position: this.cubeTarget }
+						}
+					}, 1.0 * flatDist, MRE.AnimationEaseCurves.Linear);
+				}
+				if(this.currentCube2) {
+					this.currentCube2.animateTo({
+						transform: {
+							local: { position: this.cubeTarget2 }
+						}
+					}, 1.0 * flatDist, MRE.AnimationEaseCurves.Linear);
+				}
 
-				this.cubeTarget = handPos2;
+				////////////////// User 1 ---> User 2 /////////////////////
 				this.currentCube= this.visCubes.shift();
-				this.currentCube.transform.local.position=handPos;	
-				this.currentCube.appearance.material.color=	new MRE.Color4(1.0, 0.0, 0.0, 1.0);			
-				this.visCubes.push(this.currentCube); //add back to the end of the queue
+				this.currentCube.transform.app.position=new Vector3(0,0,0);
 
-				this.cubeTarget2 = handPos;
+				const jitteredHandPos = new Vector3(
+					handPos.x + (Math.random() * 0.005),
+					handPos.y + (Math.random() * 0.005),
+					handPos.z + (Math.random() * 0.005));
+	
+				this.currentCube.transform.local.position=jitteredHandPos;
+				this.cubeTarget = handPos2;
+				this.currentCube.appearance.material.color=	new MRE.Color4(1.0, 0.0, 0.0, 1.0);			
+				this.visCubes.push(this.currentCube); //add back to the end of the queue*/
+
+				////////////////// User 2 ---> User 1 /////////////////////
 				this.currentCube2= this.visCubes.shift();
-				this.currentCube2.transform.local.position=handPos2;	
+				this.currentCube2.transform.app.position=new Vector3(0,0,0);
+
+				const jitteredHandPos2 = new Vector3(
+					handPos2.x + (Math.random() * 0.005),
+					handPos2.y + (Math.random() * 0.005),
+					handPos2.z + (Math.random() * 0.005));
+
+				this.currentCube2.transform.local.position=jitteredHandPos2; 
+				this.cubeTarget2 = handPos;
 				this.currentCube2.appearance.material.color=	new MRE.Color4(0.0, 1.0, 0.0, 1.0);					
 				this.visCubes.push(this.currentCube2); //add back to the end of the queue
+				
+				
 			}
 		}
 
 		//for some reason waiting one frame gives time for position change take effect
-		if ((this.frameCounter - 1) % 3 === 0) {
-			if (this.currentCube) {
-				
-				/*const animationName = 'MoveToPole' + this.frameCounter;
-				this.currentCube.createAnimation(animationName, {
-					initialState: {	enabled: true, },
-					keyframes: this.generateKeyframes(1.0 * flatDist, handPos, this.cubeTarget),
-					events: [],
-					wrapMode: MRE.AnimationWrapMode.Once
-				});*/				
-
-				this.currentCube.animateTo({
-					transform: {
-						local: { position: this.cubeTarget }
-					}
-				}, 1.0 * flatDist, MRE.AnimationEaseCurves.Linear);
-			}
-		}
+		/*if ((this.frameCounter - 2) % 3 === 0) {
+			
+		}*/
 
 		this.frameCounter++;
 	}
