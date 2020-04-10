@@ -172,6 +172,12 @@ export default class HelloWorld {
 					//new Vector3(0, 0, 0));
 					hands[1].transform.app.position);
 			}
+			if (this.allLeftHands.size > 1) {
+				const hands = Array.from(this.allLeftHands.values());
+				this.leftSoundHand.updateSound("lefthand", hands[0].transform.app.position,
+					//new Vector3(0, 0, 0));
+					hands[1].transform.app.position);
+			}
 		}, 30); //fire every 30ms
 		
 

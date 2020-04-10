@@ -102,7 +102,6 @@ export default class SoundHand {
 		//MRE.log.info("app", "     pitch: " + ourPitch);
 		//MRE.log.info("app", "     vol: " + ourVol);
 
-
 		this.playingSounds[0].setState(
 			{
 				pitch: ourPitch,
@@ -170,19 +169,10 @@ export default class SoundHand {
 			let timeCreated=v[0];
 			let lifeTime=v[1];
 
-			//MRE.log.info("app","time create: " + timeCreated + " lifeTime: " + lifeTime);
-
 			if(d.getTime()-timeCreated>lifeTime){
-				//MRE.log.info("app","   object has lived too long! hiding");
 				k.appearance.enabled=false;
 			}
 		}
-
-
-		//for some reason waiting one frame gives time for position change take effect
-		/*if ((this.frameCounter - 2) % 3 === 0) {
-			
-		}*/
 
 		this.frameCounter++;
 	}
