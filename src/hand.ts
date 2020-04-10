@@ -14,10 +14,13 @@ export default class SoundHand {
 	private playingSounds: MRE.MediaInstance[] = [];
 	private boxMesh: MRE.Mesh;
 	private visCubes: MRE.Actor[] = [];
-	private visCubes2: MRE.Actor[] = [];
+	private visCubeTimeCreated: Map<MRE.Actor,number[]>=new Map();
+
 	private frameCounter=0;
 	private currentCube: MRE.Actor=null;
 	private cubeTarget: MRE.Vector3;
+	private cubeTime: number;
+
 	private currentCube2: MRE.Actor=null;
 	private cubeTarget2: MRE.Vector3;
 
@@ -79,6 +82,8 @@ export default class SoundHand {
 	}
 
 	public updateSound(handName: string, handPos: MRE.Vector3,handPos2: MRE.Vector3) {
+		const d = new Date();
+
 		const flatDist: number = this.computeFlatDistance(handPos,handPos2);
 		const distClamped: number = this.clampVal(flatDist,0.0,2.0);
 
@@ -111,15 +116,17 @@ export default class SoundHand {
 						transform: {
 							local: { position: this.cubeTarget }
 						}
-					}, 1.0 * flatDist, MRE.AnimationEaseCurves.Linear);
+					}, this.cubeTime, MRE.AnimationEaseCurves.Linear);
 				}
 				if(this.currentCube2) {
 					this.currentCube2.animateTo({
 						transform: {
 							local: { position: this.cubeTarget2 }
 						}
-					}, 1.0 * flatDist, MRE.AnimationEaseCurves.Linear);
+					}, this.cubeTime, MRE.AnimationEaseCurves.Linear);
 				}
+
+				this.cubeTime=1.0*flatDist;
 
 				////////////////// User 1 ---> User 2 /////////////////////
 				this.currentCube= this.visCubes.shift();
@@ -132,8 +139,12 @@ export default class SoundHand {
 	
 				this.currentCube.transform.local.position=jitteredHandPos;
 				this.cubeTarget = handPos2;
+
+				this.currentCube.appearance.enabled=true;
 				this.currentCube.appearance.material.color=	new MRE.Color4(1.0, 0.0, 0.0, 1.0);			
+				
 				this.visCubes.push(this.currentCube); //add back to the end of the queue*/
+				this.visCubeTimeCreated.set(this.currentCube,[d.getTime(), this.cubeTime*1000]);
 
 				////////////////// User 2 ---> User 1 /////////////////////
 				this.currentCube2= this.visCubes.shift();
@@ -146,12 +157,27 @@ export default class SoundHand {
 
 				this.currentCube2.transform.local.position=jitteredHandPos2; 
 				this.cubeTarget2 = handPos;
+
+				this.currentCube2.appearance.enabled=true;
 				this.currentCube2.appearance.material.color=	new MRE.Color4(0.0, 1.0, 0.0, 1.0);					
-				this.visCubes.push(this.currentCube2); //add back to the end of the queue
 				
-				
+				this.visCubes.push(this.currentCube2); //add back to the end of the queue	
+				this.visCubeTimeCreated.set(this.currentCube,[d.getTime(), this.cubeTime*1000]);			
 			}
 		}
+
+		for(let [k,v] of this.visCubeTimeCreated){
+			let timeCreated=v[0];
+			let lifeTime=v[1];
+
+			//MRE.log.info("app","time create: " + timeCreated + " lifeTime: " + lifeTime);
+
+			if(d.getTime()-timeCreated>lifeTime){
+				//MRE.log.info("app","   object has lived too long! hiding");
+				k.appearance.enabled=false;
+			}
+		}
+
 
 		//for some reason waiting one frame gives time for position change take effect
 		/*if ((this.frameCounter - 2) % 3 === 0) {
